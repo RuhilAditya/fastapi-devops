@@ -30,3 +30,45 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/my-frontend:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Backend Container
+        uses: azure/container-instances-deploy-action@v1
+        with:
+          resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          name: devopsapp-backend
+          image: ${{ secrets.DOCKER_USERNAME }}/my-backend:latest
+          cpu: 1
+          memory: 1
+          registry-login-username: ${{ secrets.DOCKER_USERNAME }}
+          registry-login-password: ${{ secrets.DOCKER_PASSWORD }}
+          ports: '8000'
+          environment-variables: 'LOG_LEVEL=INFO'
+
+      - name: Deploy Frontend Container
+        uses: azure/container-instances-deploy-action@v1
+        with:
+          resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          name: devopsapp-frontend
+          image: ${{ secrets.DOCKER_USERNAME }}/my-frontend:latest
+          cpu: 1
+          memory: 1
+          registry-login-username: ${{ secrets.DOCKER_USERNAME }}
+          registry-login-password: ${{ secrets.DOCKER_PASSWORD }}
+          ports: '80'
+
+      - name: Display Deployment Info
+        run: |
+          echo "Backend deployed and accessible at: http://devopsapp-backend:8000"
+          echo "Frontend deployed and accessible at: http://devopsapp-frontend:80"
