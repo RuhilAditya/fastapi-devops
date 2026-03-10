@@ -6,8 +6,13 @@
     <script>
         // We use the container name or public IP here later
         fetch('http://localhost:8000/')
-            .then(res => res.json())
-            .then(data => document.getElementById('status').innerText = data.status);
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('status').innerText = "Backend Status: " + data.status;
+    })
+    .catch(err => {
+        document.getElementById('status').innerText = "Error: Cannot reach Backend!";
+    });
     </script>
 </body>
 </html>

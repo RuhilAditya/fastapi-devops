@@ -1,26 +1,16 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
+from fastapi.middleware.cors import CORSMiddleware # Add this
 
 app = FastAPI()
 
-class Task(BaseModel):
-    id: int
-    title: str
-    completed: bool = False
-
-# In-memory database
-tasks = []
+# Add the "Guest List"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, you'd put your specific URL here
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
     return {"status": "API is online"}
-
-@app.post("/tasks", response_model=Task)
-def create_task(task: Task):
-    tasks.append(task)
-    return task
-
-@app.get("/tasks", response_model=List[Task])
-def get_tasks():
-    return tasks
