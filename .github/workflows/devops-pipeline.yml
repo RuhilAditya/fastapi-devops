@@ -5,6 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
+  # Job 1: Build the containers and send them to Docker Hub
   build-and-push:
     runs-on: ubuntu-latest
     steps:
@@ -30,3 +31,15 @@ jobs:
           context: ./frontend
           push: true
           tags: adiruhil/my-frontend:latest
+
+  # Job 2: This is the 'Deploy' stage you want to see
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push # This ensures deploy only starts if build succeeds
+    steps:
+      - name: Simulate Deployment
+        run: |
+          echo "Connecting to Production Server..."
+          echo "Pulling latest images from Docker Hub..."
+          echo "Restarting Docker Compose services..."
+          echo "Deployment Successful!"
