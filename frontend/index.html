@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Task Manager</h1>
+    <div id="status">Connecting to Backend...</div>
+    <script>
+        // We use the container name or public IP here later
+        fetch('http://localhost:8000/')
+            .then(res => res.json())
+            .then(data => document.getElementById('status').innerText = data.status);
+    </script>
+</body>
+</html>

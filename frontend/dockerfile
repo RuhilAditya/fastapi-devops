@@ -1,0 +1,4 @@
+# Use Nginx to serve the static HTML file
+FROM nginx:alpine
+COPY . /usr/share/nginx/html
+EXPOSE 80
