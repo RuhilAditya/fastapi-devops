@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # 1. The Database (Official image from Docker Hub)
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_prod
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 2. Your Backend (Pulling from your Docker Hub)
+  backend:
+    image: adiruhil/my-backend:latest
+    container_name: backend_prod
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+
+  # 3. Your Frontend (Pulling from your Docker Hub)
+  frontend:
+    image: adiruhil/my-frontend:latest
+    container_name: frontend_prod
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
