@@ -1,18 +1,76 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h1>Task Manager</h1>
-    <div id="status">Connecting to Backend...</div>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>DevOps Status Pro</title>
+</head>
+<body class="bg-slate-900 text-white font-sans">
+    <div class="max-w-4xl mx-auto py-12 px-4">
+        <header class="flex justify-between items-center mb-10 border-b border-slate-700 pb-6">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                DevOps Control Center
+            </h1>
+            <div id="api-status" class="px-3 py-1 rounded-full text-xs font-mono bg-slate-800 border border-slate-600">
+                Checking API...
+            </div>
+        </header>
+
+        <div class="bg-slate-800 p-6 rounded-xl shadow-xl mb-8 border border-slate-700">
+            <h2 class="text-lg font-semibold mb-4 text-slate-300">Register New Service</h2>
+            <div class="flex gap-4">
+                <input id="nameInput" type="text" placeholder="Service Name (e.g. Redis)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input id="statusInput" type="text" placeholder="Status" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="addService()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-medium transition-colors">Add</button>
+            </div>
+        </div>
+
+        <div id="service-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+    </div>
+
     <script>
-        // We use the container name or public IP here later
-        fetch('http://localhost:8000/')
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById('status').innerText = "Backend Status: " + data.status;
-    })
-    .catch(err => {
-        document.getElementById('status').innerText = "Error: Cannot reach Backend!";
-    });
+        const API_URL = 'http://localhost:8000';
+
+        async function fetchHealth() {
+            try {
+                const res = await fetch(`${API_URL}/`);
+                const data = await res.json();
+                document.getElementById('api-status').innerText = `● ${data.status} v${data.version}`;
+                document.getElementById('api-status').classList.add('text-emerald-400');
+            } catch {
+                document.getElementById('api-status').innerText = '● API Offline';
+                document.getElementById('api-status').classList.add('text-red-400');
+            }
+        }
+
+        async function loadServices() {
+            const res = await fetch(`${API_URL}/services`);
+            const data = await res.json();
+            const container = document.getElementById('service-list');
+            container.innerHTML = data.map(s => `
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 hover:border-slate-500 transition-all">
+                    <p class="text-slate-400 text-sm uppercase tracking-wider font-bold">${s.name}</p>
+                    <p class="text-xl mt-1">${s.status}</p>
+                </div>
+            `).join('');
+        }
+
+        async function addService() {
+            const name = document.getElementById('nameInput').value;
+            const status = document.getElementById('statusInput').value;
+            await fetch(`${API_URL}/services`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, status})
+            });
+            document.getElementById('nameInput').value = '';
+            document.getElementById('statusInput').value = '';
+            loadServices();
+        }
+
+        fetchHealth();
+        loadServices();
     </script>
 </body>
 </html>
